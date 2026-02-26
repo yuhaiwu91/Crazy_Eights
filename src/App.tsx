@@ -130,25 +130,45 @@ const CrazyEights: React.FC = () => {
     }
   }, [isPlayerTurn, aiHand, discardPile, gameStatus]);
 
-  // 3. 为子组件添加 props 类型 / Add Props types for Card component
-  const Card = ({ card, isHidden, onClick, disabled }: { 
-    card?: CardType, 
-    isHidden: boolean, 
-    onClick?: () => void, 
-    disabled?: boolean 
+  // 每个花色对应的中国知名建筑 emoji / Landmark emoji per suit
+  const SUIT_LANDMARK: Record<string, string> = {
+    '♥️': '🏯',  // 故宫
+    '♦️': '🗼',  // 东方明珠
+    '♣️': '🏔️', // 黄山
+    '♠️': '🌉',  // 南京长江大桥
+  };
+
+  // Card 组件 / Card component
+  const Card = ({ card, isHidden, onClick, disabled }: {
+    card?: CardType,
+    isHidden: boolean,
+    onClick?: () => void,
+    disabled?: boolean
   }) => (
-    <div 
+    <div
       onClick={onClick}
-      className={`relative w-16 h-24 md:w-24 md:h-36 rounded-xl border-2 flex items-center justify-center text-xl md:text-2xl font-bold cursor-pointer transition-all transform 
+      className={`relative w-16 h-24 md:w-24 md:h-36 rounded-xl border-2 flex items-center justify-center text-xl md:text-2xl font-bold cursor-pointer transition-all transform overflow-hidden
         ${!disabled && 'hover:-translate-y-2'}
-        ${isHidden ? 'bg-blue-600 border-white text-transparent' : 'bg-white border-gray-200'}
+        ${isHidden ? 'bg-gradient-to-br from-blue-500 to-blue-800 border-white' : 'bg-white border-gray-200'}
         ${!isHidden && card && (card.suit === '♥️' || card.suit === '♦️') ? 'text-red-500' : 'text-slate-800'}
         ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : 'shadow-lg'}`}
     >
-      {isHidden ? '?' : (
-        <div className="flex flex-col items-center">
-          <span>{card?.value}</span>
-          <span className="text-3xl">{card?.suit}</span>
+      {isHidden ? (
+        // 牌背：可爱小马 emoji / Card back: cute horse
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-4xl">🐴</span>
+          <span className="text-xs text-white/70 font-normal">✦✦✦</span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center relative w-full h-full justify-center">
+          {/* 半透明建筑背景 / Semi-transparent landmark background */}
+          {card?.suit && (
+            <span className="absolute text-5xl opacity-20 select-none">
+              {SUIT_LANDMARK[card.suit]}
+            </span>
+          )}
+          <span className="relative z-10">{card?.value}</span>
+          <span className="relative z-10 text-3xl">{card?.suit}</span>
         </div>
       )}
     </div>
@@ -233,9 +253,12 @@ const CrazyEights: React.FC = () => {
 
       {/* 结算与开始界面 */}
       {(gameStatus !== 'playing') && (
-        <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50 p-6 text-center">
+        <div className="fixed inset-0 bg-green-900/80 backdrop-blur-md flex flex-col items-center justify-center z-50 p-6 text-center">
           {gameStatus === 'waiting' ? (
-             <h1 className="text-6xl font-black mb-8 italic text-yellow-400">Bela'Crazy Eights</h1>
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl px-12 py-10 shadow-2xl flex flex-col items-center">
+              <h1 className="text-6xl font-black italic text-yellow-400 mb-2">Bela'Crazy Eights</h1>
+              <p className="text-2xl font-bold text-white/80 mb-8 tracking-widest">Bela 的疯狂8点</p>
+            </div>
           ) : (
             <>
               <Trophy className={gameStatus === 'won' ? 'text-yellow-400 mb-4' : 'text-gray-400 mb-4'} size={80} />
@@ -244,9 +267,9 @@ const CrazyEights: React.FC = () => {
               </h2>
             </>
           )}
-          <button 
+          <button
             onClick={startGame}
-            className="bg-yellow-500 hover:bg-yellow-400 text-black px-12 py-4 rounded-full font-black text-xl shadow-2xl transition-all"
+            className="mt-8 bg-yellow-500 hover:bg-yellow-400 text-black px-12 py-4 rounded-full font-black text-xl shadow-2xl transition-all hover:scale-105"
           >
             {gameStatus === 'waiting' ? 'START GAME' : 'PLAY AGAIN'}
           </button>
